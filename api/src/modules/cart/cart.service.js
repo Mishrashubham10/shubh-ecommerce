@@ -93,7 +93,7 @@ export const removeFromCartService = async (userId, productId) => {
 };
 
 /**
- * CLEAR CART
+ * CLEAR CART (USED AFTER ORDER)
  */
 export const clearCartService = async (userId) => {
   const cart = await getOrCreateCart(userId);

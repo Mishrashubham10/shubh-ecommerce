@@ -26,3 +26,8 @@ export const validateUpdateCart = ({ productId, quantity }) => {
 
   return null;
 };
+
+export const validateRemoveFromCart = ({ productId }) => {
+  if (!productId) return "Product ID is required";
+  return null;
+}

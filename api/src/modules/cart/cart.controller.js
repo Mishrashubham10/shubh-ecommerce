@@ -1,10 +1,11 @@
+import { calculateCartTotal } from '../../utils/cart.utils.js';
 import {
   addToCartService,
   getOrCreateCart,
   removeFromCartService,
   updateCartItemService,
 } from './cart.service.js';
-import { validateAddToCart } from './cart.validation.js';
+import { validateAddToCart, validateRemoveFromCart } from './cart.validation.js';
 
 /**
  * GET CART
@@ -21,7 +22,12 @@ export const getCart = async (req, res) => {
       select: "title images price discountPrice stock"
     })
 
-    res.status(200).json(cart);
+    const totalPrice = calculateCartTotal(cart);
+
+    res.status(200).json({
+      ...cart.toObject(),
+      totalPrice,
+    });
   } catch (error) {
     console.error('GET CART ERROR:', error.message);
     res.status(500).json({ message: 'Failed to fetch cart' });
@@ -81,7 +87,7 @@ export const updateCartItem = async (req, res) => {
  */
 export const removeFromCart = async (req, res) => {
   try {
-    const error = validateAddToCart(req.body);
+    const error = validateRemoveFromCart(req.body);
     if (error) {
       return res.status(400).json({ message: error });
     }
