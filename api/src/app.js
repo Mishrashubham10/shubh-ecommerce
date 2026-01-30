@@ -6,8 +6,11 @@ import path from 'path';
 import productRoutes from "./modules/product/product.routes.js";
 import cartRoutes from './modules/cart/cart.routes.js';
 import orderRoutes from "./modules/order/order.routes.js";
+import paymentRoutes from "./modules/payment/payment.routes.js";
 
 const app = express();
+
+const API_VERSION = "/api/v1";
 
 /***
  * ---------------------
@@ -24,10 +27,11 @@ app.use(express.json());
  * HEALTH CHECK ROUTE
  * Used to verify server is alive
  */
-app.use('/api/v1/products', productRoutes);
+app.use(`${API_VERSION}/products`, productRoutes);
 // SERVE UPLOADED IMAGES PUBLICALY
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-app.use('/api/v1/carts', cartRoutes);
-app.use('/api/v1/orders', orderRoutes);
+app.use(`${API_VERSION}/carts`, cartRoutes);
+app.use(`${API_VERSION}/orders`, orderRoutes);
+app.use(`${API_VERSION}/payments`, paymentRoutes);
 
 export default app;
