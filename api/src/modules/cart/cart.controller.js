@@ -1,10 +1,10 @@
-import { calculateCartTotal } from '../../utils/cart.utils.js';
 import {
   addToCartService,
   getOrCreateCart,
   removeFromCartService,
   updateCartItemService,
 } from './cart.service.js';
+import { calculateCartTotal } from './cart.utils.js';
 import { validateAddToCart, validateRemoveFromCart } from './cart.validation.js';
 
 /**
