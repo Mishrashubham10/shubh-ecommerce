@@ -40,7 +40,6 @@ const orderSchema = new mongoose.Schema(
     shippingAddress: {
       line1: String,
       city: String,
-      state: String,
       pincode: String,
       country: String,
     },
@@ -48,15 +47,55 @@ const orderSchema = new mongoose.Schema(
     // ORDER LIFECYCLE
     status: {
       type: String,
-      enum: ['CREATED', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLLED'],
+      enum: [
+        'CREATED', // order created, payment not done
+        'PAID', // payment successful
+        'SHIPPED', // handed to courier
+        'OUT_FOR_DELIVERY', // optional but useful
+        'DELIVERED', // completed
+        'CANCELLED', // cancelled before shipping
+        'REFUNDED',
+      ],
       default: 'CREATED',
+      index: true,
     },
 
+    // STATUS HISTORY
+    statusHistory: [
+      {
+        status: String,
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        updatedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User', // admin or system
+        },
+      },
+    ],
+
     // PAYMENT REFRENCE (ADDED LATER)
-    paymentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Payment',
+    payment: {
+      paymentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Payment',
+      },
+      method: String,   // razorpay | stripe | cod
+      status: {
+        type: String,
+        enum: ['PENDING', 'SUCCESS', 'FAILED'],
+      },
     },
+
+    // TRACKING
+    tracking: {
+      courier: String,
+      trackingNumber: String,
+    },
+
+    // CANCEL REASON
+    cancelReason: String
   },
   { timestamps: true },
 );

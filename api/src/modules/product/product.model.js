@@ -77,8 +77,6 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ title: 'text' });
-productSchema.index({ sellerId: 1 });
-productSchema.index({ categoryId: 1 });
 
 const Product = mongoose.model('Product', productSchema);
 

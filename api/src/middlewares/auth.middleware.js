@@ -94,8 +94,8 @@ export const authorizeRoles = (...allowedRoles) => {
      * So authorizeRoles MUST run AFTER protect
      */
     if (!req.user) {
-      return res.status(300).json({
-        message: 'User not loaded before role check',
+      return res.status(401).json({
+        message: 'Not authecticated',
       });
     }
 
