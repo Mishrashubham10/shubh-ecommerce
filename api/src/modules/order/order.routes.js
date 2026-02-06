@@ -6,6 +6,7 @@ import {
   getSellerOrders,
   getUserOrderById,
   getUserOrders,
+  refundOrder,
   updateOrderStatus,
 } from './order.controller.js';
 import { authorizeRoles, protect } from '../../middlewares/auth.middleware.js';
@@ -48,6 +49,12 @@ router.get(
   protect,
   authorizeRoles('ADMIN', 'SUPER_ADMIN'),
   getOrderById,
+);
+router.post(
+  '/admin/:orderId/refund',
+  protect,
+  authorizeRoles('ADMIN', 'SUPER_ADMIN'),
+  refundOrder,
 );
 
 /**

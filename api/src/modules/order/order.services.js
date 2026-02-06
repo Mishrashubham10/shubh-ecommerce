@@ -287,3 +287,88 @@ export const getUserOrderByIdService = async ({ orderId, userId }) => {
 export const clearCartService = async (userId, session) => {
   await Cart.findOneAndUpdate({ userId }, { items: [] }, { session });
 };
+
+/**
+ * MARK ORDER AS PAID
+ * -----------------
+ * This is called ONLY after payment success is confirmed.
+ * Idempotent & lifecycle-safe.
+ */
+export const markOrderAsPaidService = async ({ orderId, paymentId }) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    const error = new Error('Order not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  /**
+   * ✅ Idempotency guard
+   * If order is already PAID or beyond, do nothing
+   */
+  if (order.status !== 'CREATED') {
+    return order;
+  }
+
+  // UPDATE ORDER STATUS
+  order.status = 'PAID';
+
+  // ENSURE PAYMENT OBJECT EXISTS
+  if (!order.payment) {
+    order.payment = {};
+  }
+
+  // SYNC PAYMENT SNAPSHOT
+  order.payment.paymentId = paymentId;
+  order.payment.status = 'SUCCESS';
+  order.payment.method = order.payment.method || 'STRIPE';
+
+  // TRACK LIFECYCLE HISTORY
+  order.statusHistory.push({
+    status: 'PAID',
+  });
+
+  await order.save();
+  return order;
+};
+
+/**
+ * REFUND ORDER (ADMIN)
+ * -------------------
+ * BASIC refund: marks order as REFUNDED
+ */
+export const refundOrderService = async ({ orderId, adminId, reason }) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    const error = new Error('Order not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // REFUND ELIGIBILITY
+  if (!['PAID', 'DELIVERED'].includes(order.status)) {
+    const error = new Error(`Cannot refund order with status ${order.status}`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // UPDATE ORDER
+  order.status = 'REFUNDED';
+  order.cancelReason = reason || 'Refund by admin';
+
+  // SYNC PAYMENT SNAPSHOT
+  if (order.payment) {
+    order.payment.status = 'FAILED';
+  }
+
+  // TRACK LIFECYCLE
+  order.statusHistory.push({
+    status: 'REFUNDED',
+    updatedBy: adminId,
+  });
+
+  await order.save();
+  return order;
+};

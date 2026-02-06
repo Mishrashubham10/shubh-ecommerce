@@ -22,12 +22,15 @@ const paymentSchema = new mongoose.Schema(
     },
 
     provider: {
-      type: String,
+      type: String, // RAZORPAY / STRIPE
+      required: true,
       default: 'STRIPE', // FUTURE PROOF
     },
 
     providerPaymentId: {
       type: String, // PAYMENTINTENTID / CHARGEID
+      unique: true,
+      sparse: true,
     },
 
     amount: {

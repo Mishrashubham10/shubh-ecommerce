@@ -1,7 +1,8 @@
 import {
   createPaymentService,
-  markPaymentSuccess,
-  markPaymentFailed,
+  markPaymentSuccessService,
+  markPaymentFailedService,
+  handlePaymentSuccessService,
 } from './payment.service.js';
 
 /**
@@ -42,17 +43,17 @@ export const paymentWebhook = async (req, res) => {
      * - Verify signature
      * - Parse event type
      */
-    const { eventType, providerPaymentId } = req.body;
+    const { orderId, userId, providerPaymentId, amount } = req.body;
 
-    if (eventType === 'PAYMENT_SUCCESS') {
-      await markPaymentSuccess(providerPaymentId);
-    }
+    await handlePaymentSuccessService({
+      orderId,
+      userId,
+      provider: 'STRIPE',
+      providerPaymentId,
+      amount,
+    });
 
-    if (eventType === 'PAYMENT_FAILED') {
-      await markPaymentFailed(providerPaymentId);
-    }
-
-    res.status(200).json({ received: true });
+    res.status(200).json({ success: true });
   } catch (err) {
     console.error('WEBHOOK ERROR:', err.message);
     res.status(400).json({ message: 'Webhook error' });

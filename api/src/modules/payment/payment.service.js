@@ -1,5 +1,6 @@
 import Payment from './payment.model.js';
 import Order from '../order/order.model.js';
+import { markOrderAsPaidService } from '../order/order.services.js';
 
 /**
  * CREATE PAYMENT RECORD
@@ -37,7 +38,7 @@ export const createPaymentService = async (userId, orderId) => {
 /**
  * HANDLE PAYMENT SUCCESS (WEBHOOK)
  */
-export const markPaymentSuccess = async (providerPaymentId) => {
+export const markPaymentSuccessService = async (providerPaymentId) => {
   const payment = await Payment.findOne({ providerPaymentId });
 
   if (!payment) {
@@ -61,7 +62,7 @@ export const markPaymentSuccess = async (providerPaymentId) => {
 /**
  * HANDLE PAYMENT FAILURE (WEBHOOK)
  */
-export const markPaymentFailed = async (providerPaymentId) => {
+export const markPaymentFailedService = async (providerPaymentId) => {
   const payment = await Payment.findOne({ providerPaymentId });
 
   if (!payment) return;
@@ -69,3 +70,48 @@ export const markPaymentFailed = async (providerPaymentId) => {
   payment.status = 'FAILED';
   await payment.save();
 };
+
+/**
+ * HANDLE PAYMENT SUCCESS SERVICE
+ */
+export const handlePaymentSuccessService = async ({
+  orderId,
+  userId,
+  provider,
+  providerPaymentId,
+  amount
+}) => {
+  // FETCH ORDER
+  const order = await Order.findById(orderId)
+
+  if (!order) {
+    throw new Error('Order not found')
+  }
+
+  // AMOUNT VERIFICATION (CRITICAL)
+  if (order.totalAmount !== amount) {
+    throw new Error('Payment amount mismatch')
+  }
+
+  // CREATE OR IGNORE DUPLICATE PAYMENT
+  const payment = await Payment.findOneAndUpdate(
+    { providerPaymentId },
+    {
+      orderId,
+      userId,
+      provider,
+      providerPaymentId,
+      amount,
+      status: 'SUCCESS'
+    },
+    { upsert: true, new: true }
+  )
+
+  // SYNC ORDER STATUS
+  await markOrderAsPaidService({
+    orderId,
+    paymentId: payment._id
+  })
+
+  return payment
+}

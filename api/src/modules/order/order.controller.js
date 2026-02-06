@@ -6,6 +6,7 @@ import {
   getSellerOrdersService,
   getUserOrderByIdService,
   getUserOrdersService,
+  refundOrderService,
   updateOrderStatusService,
 } from './order.services.js';
 
@@ -172,6 +173,31 @@ export const getUserOrderById = async (req, res) => {
   } catch (error) {
     res.status(error.statusCode || 500).json({
       message: error.message || 'Failed to fetch order',
+    });
+  }
+};
+
+/**
+ * REFUND ORDER (ADMIN)
+ */
+export const refundOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { reason } = req.body;
+
+    const order = await refundOrderService({
+      orderId,
+      adminId: req.user._id,
+      reason,
+    });
+
+    res.json({
+      message: 'Order refunded successfully',
+      order,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      message: error.message || 'Refund failed',
     });
   }
 };
