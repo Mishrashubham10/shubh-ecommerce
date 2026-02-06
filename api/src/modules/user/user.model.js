@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 /**
  * User Schema
@@ -41,8 +42,10 @@ const userSchema = new mongoose.Schema(
     lastLoginAt: {
       type: Date,
     },
+
+    passwordChangedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
@@ -52,6 +55,24 @@ const userSchema = new mongoose.Schema(
  * This is extremely important at scale.
  */
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 export default User;
+
+/**
+ * PASSWORD HASING (BCRYPT)
+ * USING SCHEMA PRE METHOD
+ */
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+/**
+ * PASSWORD COMPARISION METHOD
+ */
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
