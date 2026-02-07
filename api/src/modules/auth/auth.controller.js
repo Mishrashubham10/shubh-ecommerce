@@ -1,5 +1,11 @@
 import { asyncHandler } from '../../utils/asyncHandler.js';
-import { loginUserService, registerUserService } from './auth.service.js';
+import {
+  loginUserService,
+  logoutAllService,
+  logoutService,
+  refreshAccessTokenService,
+  registerUserService,
+} from './auth.service.js';
 
 /**
  * REGISTER CONTROLLER
@@ -36,5 +42,48 @@ export const login = asyncHandler(async (req, res) => {
     },
     accessToken: data.accessToken,
     refreshToke: data.refreshToken,
+  });
+});
+
+/**
+ * REFRESH TOKEN
+ */
+export const refreshToken = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  const data = await refreshAccessTokenService({
+    refreshToken,
+  });
+
+  res.json({
+    success: true,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+  });
+});
+
+/**
+ * LOGOUT
+ */
+export const logout = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  await logoutService({ refreshToken });
+
+  res.json({
+    success: true,
+    message: 'Logged out successfully',
+  });
+});
+
+/**
+ * LOGOUT ALL
+ */
+export const logoutAll = asyncHandler(async (req, res) => {
+  await logoutAllService({ userId: req.user._id });
+
+  res.json({
+    success: true,
+    message: 'Logged out from all devices',
   });
 });

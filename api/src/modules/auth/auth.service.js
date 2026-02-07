@@ -137,7 +137,7 @@ export const refreshAccessTokenService = async ({ refreshToken }) => {
 /**
  * LOGOUT (single device)
  */
-export const logout = async ({ refreshToken }) => {
+export const logoutService = async ({ refreshToken }) => {
   if (!refreshToken) return;
 
   await RefreshToken.findOneAndUpdate(
