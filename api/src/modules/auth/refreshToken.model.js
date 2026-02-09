@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 /**
  * REFRESH TOKEN (JWT)
  * WHOLE MONGOOSE MODEL

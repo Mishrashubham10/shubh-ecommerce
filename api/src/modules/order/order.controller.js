@@ -1,3 +1,4 @@
+import { asyncHandler } from '../../utils/asyncHandler.js';
 import { getOrCreateCart } from '../cart/cart.service.js';
 import {
   createOrderService,
@@ -7,6 +8,7 @@ import {
   getUserOrderByIdService,
   getUserOrdersService,
   refundOrderService,
+  requestReturnService,
   updateOrderStatusService,
 } from './order.services.js';
 
@@ -201,3 +203,23 @@ export const refundOrder = async (req, res) => {
     });
   }
 };
+
+/**
+ * USER RETURN CONTROLLER (ADMIN)
+ */
+export const requestReturn = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const { reason } = req.body;
+
+  const order = await requestReturnService({
+    orderId,
+    userId: req.user._id,
+    reason,
+  });
+
+  res.json({
+    success: true,
+    message: 'Return requested successfully',
+    order,
+  });
+});

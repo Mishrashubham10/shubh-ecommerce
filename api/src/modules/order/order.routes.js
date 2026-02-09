@@ -7,9 +7,11 @@ import {
   getUserOrderById,
   getUserOrders,
   refundOrder,
+  requestReturn,
   updateOrderStatus,
 } from './order.controller.js';
 import { authorizeRoles, protect } from '../../middlewares/auth.middleware.js';
+import { reviewReturnService } from './order.services.js';
 
 const router = express.Router();
 
@@ -56,10 +58,23 @@ router.post(
   authorizeRoles('ADMIN', 'SUPER_ADMIN'),
   refundOrder,
 );
+router.post(
+  '/admin/:orderId/return-review',
+  protect,
+  authorizeRoles('ADMIN', 'SUPER_ADMIN'),
+  reviewReturnService
+);
 
 /**
  * SELLER ROUTES
  */
 router.get('/seller', protect, authorizeRoles('SELLER'), getSellerOrders);
+
+router.post(
+  '/my-orders/:orderId/return',
+  protect,
+  authorizeRoles('USER'),
+  requestReturn,
+);
 
 export default router;

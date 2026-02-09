@@ -81,7 +81,7 @@ const orderSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment',
       },
-      method: String,   // razorpay | stripe | cod
+      method: String, // razorpay | stripe | cod
       status: {
         type: String,
         enum: ['PENDING', 'SUCCESS', 'FAILED'],
@@ -95,7 +95,22 @@ const orderSchema = new mongoose.Schema(
     },
 
     // CANCEL REASON
-    cancelReason: String
+    cancelReason: String,
+
+    return: {
+      isRequested: {
+        type: Boolean,
+        default: false,
+      },
+
+      reason: String,
+      requestedAt: Date,
+
+      status: {
+        type: String,
+        enum: ['REQUESTED', 'APPROVED', 'REJECTED', 'COMPLETED'],
+      },
+    },
   },
   { timestamps: true },
 );

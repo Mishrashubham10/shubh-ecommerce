@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import Product from '../product/product.model.js';
 import Order from './order.model.js';
 import { calculateOrderTotal, canUpdateOrderStatus } from './order.utils.js';
+import { ApiError } from '../../utils/ApiError.js';
+import { createShipmentService } from '../shipment/shipment.services.js';
+import { onOrderPaid } from '../notification/notification.events.js';
 
 /**
  * CREATE ORDER SERVICE
@@ -298,9 +301,7 @@ export const markOrderAsPaidService = async ({ orderId, paymentId }) => {
   const order = await Order.findById(orderId);
 
   if (!order) {
-    const error = new Error('Order not found');
-    error.statusCode = 404;
-    throw error;
+    throw new ApiError(404, 'Order not found');
   }
 
   /**
@@ -315,10 +316,7 @@ export const markOrderAsPaidService = async ({ orderId, paymentId }) => {
   order.status = 'PAID';
 
   // ENSURE PAYMENT OBJECT EXISTS
-  if (!order.payment) {
-    order.payment = {};
-  }
-
+  if (!order.payment) order.payment = {};
   // SYNC PAYMENT SNAPSHOT
   order.payment.paymentId = paymentId;
   order.payment.status = 'SUCCESS';
@@ -330,11 +328,18 @@ export const markOrderAsPaidService = async ({ orderId, paymentId }) => {
   });
 
   await order.save();
+
+  // CREATE SHIPMENT
+  await createShipmentService({ order });
+
+  // NOTIFY
+  await onOrderPaid({ order });
+
   return order;
 };
 
 /**
- * REFUND ORDER (ADMIN)
+ * REFUND ORDER SERVICE (ADMIN)
  * -------------------
  * BASIC refund: marks order as REFUNDED
  */
@@ -366,6 +371,94 @@ export const refundOrderService = async ({ orderId, adminId, reason }) => {
   // TRACK LIFECYCLE
   order.statusHistory.push({
     status: 'REFUNDED',
+    updatedBy: adminId,
+  });
+
+  await order.save();
+  return order;
+};
+
+/**
+ * UPDATE ORDER STATUS INTERNAL SERVICE (ADMIN)
+ * -------------------
+ */
+export const updateOrderStatusInternalService = async ({
+  orderId,
+  nextStatus,
+  updatedBy = null, // SYSTEM
+}) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new Error(404, 'Order not found');
+  }
+
+  if (!canUpdateOrderStatus(order.status, nextStatus)) {
+    return order; // IGNORE ILLEGAL TRANSITIONS SILENTLY
+  }
+
+  order.status = nextStatus;
+  order.statusHistory.push({
+    status: nextStatus,
+    updatedBy,
+  });
+
+  await order.save();
+  return order;
+};
+
+/**
+ * REQUEST RETURN SERVICE (USER)
+ * -------------------
+ */
+export const requestReturnService = async ({ orderId, userId, reason }) => {
+  const order = await Order.findById({
+    _id: orderId,
+    userId,
+  });
+
+  if (!order) {
+    throw new ApiError(404, 'Order not found');
+  }
+
+  if (order.status !== 'DELIVERED') {
+    throw new ApiError(400, 'Only delivered orders can be returned');
+  }
+
+  if (order.return?.isRequested) {
+    throw new ApiError(400, 'Return already requested');
+  }
+
+  order.return = {
+    isRequested: true,
+    reason,
+    requestedAt: new Date(),
+    status: 'REQUESTED',
+  };
+
+  await order.save();
+  return order;
+};
+
+/**
+ * REVIEW RETURN SERVICE (ADMIN)
+ * -------------------
+ */
+export const reviewReturnService = async ({ orderId, approve, adminId }) => {
+  const order = await Order.findById(orderId);
+
+  if (!order || !order.return?.isRequested) {
+    throw new ApiError(404, 'Return request not found');
+  }
+
+  if (approve) {
+    order.return.status = 'APPROVED';
+  } else {
+    order.return.status = 'REJECTED';
+  }
+
+  order.statusHistory.push({
+    status: `RETURN_${order.return.status}`,
     updatedBy: adminId,
   });
 
