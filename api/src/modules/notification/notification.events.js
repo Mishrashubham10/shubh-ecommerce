@@ -1,4 +1,4 @@
-import { createNotificationService } from './notification.services';
+import { createNotificationService } from './notification.services.js';
 
 /**
  * ORDER PAID EVENT

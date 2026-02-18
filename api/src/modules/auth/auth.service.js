@@ -1,5 +1,5 @@
 import { ApiError } from '../../utils/ApiError.js';
-import User from '../user/user.model.js';
+import User from './auth.model.js';
 import { generateAccessToken, generateRefreshToken } from './auth.utils.js';
 import RefreshToken from './refreshToken.model.js';
 
@@ -36,7 +36,7 @@ export const registerUserService = async ({
     userId: user._id,
     token: refreshTokenValue,
     expiresAt: new Date(
-      Date.now() + 30 * 24 * 24 * 60 * 60 * 1000, // 30 days
+      Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
     ),
   });
 

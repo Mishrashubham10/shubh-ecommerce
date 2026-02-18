@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import User from '../modules/user/user.model.js';
+import User from '../modules/auth/auth.model.js';
+import { ApiError } from '../utils/ApiError.js';
 
 /**
  * PROTECT MIDDLEWARE
@@ -16,14 +17,7 @@ export const protect = async (req, res, next) => {
   try {
     let token;
 
-    console.log(req.headers.authorization);
-
-    /**
-     * STEP 1: Extract token
-     * ---------------------
-     * We expect token in Authorization header:
-     * Authorization: Bearer <token>
-     */
+    // 1️⃣ Extract token
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
@@ -31,50 +25,26 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
     }
 
-    // ❌ No token → unauthorized
+    // 2️⃣ If no token → UNAUTHORIZED (NOT forbidden)
     if (!token) {
-      return res.status(401).json({
-        message: 'Not authorized, token missing',
-      });
+      return next(new ApiError(401, 'Not authenticated'));
     }
 
-    /**
-     * STEP 2: Verify token
-     * -------------------
-     * If token is invalid or expired, jwt.verify will throw an error
-     */
+    // 3️⃣ Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
 
-    /**
-     * STEP 3: Fetch user from DB
-     * --------------------------
-     * We DO NOT trust token blindly.
-     * User might be deleted or blocked.
-     */
+    // 4️⃣ Fetch user
     const user = await User.findById(decoded.userId);
 
     if (!user || !user.isActive) {
-      return res.status(401).json({
-        message: 'User not found or inactive',
-      });
+      return next(new ApiError(401, 'User not authorized'));
     }
 
-    /**
-     * STEP 4: Attach user to request
-     * ------------------------------
-     * Now every protected route can access req.user
-     */
+    // 5️⃣ Attach user
     req.user = user;
-    console.log(user);
-
-    next(); // ALLOW REQUEST TO CONTINUE
-  } catch (err) {
-    console.error('AUTH ERROR:', err.message);
-
-    return res.status(401).json({
-      message: 'Not authorized, token failed',
-    });
+    next();
+  } catch (error) {
+    return next(new ApiError(401, 'Invalid or expired token'));
   }
 };
 
@@ -94,17 +64,13 @@ export const authorizeRoles = (...allowedRoles) => {
      * So authorizeRoles MUST run AFTER protect
      */
     if (!req.user) {
-      return res.status(401).json({
-        message: 'Not authecticated',
-      });
+      return next(new ApiError(401, 'Not authenticated'))
     }
 
     console.log(req.user.role);
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        message: "Forbidden: You don't have permission",
-      });
+      return next(new ApiError(403, "Forbidden: You don't have permission"))
     }
 
     console.log(allowedRoles);

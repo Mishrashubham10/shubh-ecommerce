@@ -22,7 +22,7 @@ export const register = asyncHandler(async (req, res) => {
       role: data.user.role,
     },
     accessToken: data.accessToken,
-    refreshToke: data.refreshToken,
+    refreshToken: data.refreshToken,
   });
 });
 

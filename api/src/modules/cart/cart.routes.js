@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../../middlewares/auth.middleware.js';
+// import { protect } from '../../middlewares/auth.middleware.js';
 import {
   updateCartItem,
   getCart,
@@ -12,7 +12,7 @@ const router = express.Router();
 /**
  * All cart routes are USER protected
  */
-router.use(protect);
+// router.use(protect);
 
 router.get('/', getCart);
 router.post('/add', addToCart);

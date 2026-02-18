@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../../middlewares/auth.middleware.js';
+// import { protect } from '../../middlewares/auth.middleware.js';
 import {
   createAddress,
   deleteAddress,
@@ -11,7 +11,7 @@ const router = express.Router();
 /**
  * All address routes require authentication
  */
-router.use(protect);
+// router.use(protect);
 
 router.post('/', createAddress);
 router.get('/', getAddress);
