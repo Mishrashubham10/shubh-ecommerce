@@ -28,7 +28,7 @@ export const getCart = async (req, res) => {
 
     const totalPrice = calculateCartTotal(cart);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Cart fetched successfully',
       data: {
@@ -56,7 +56,7 @@ export const addToCart = async (req, res) => {
 
     const cart = await addToCartService(req.user._id, productId, quantity);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Item added to cart',
       cart
@@ -81,7 +81,7 @@ export const updateCartItem = async (req, res) => {
 
     const cart = await updateCartItemService(req.user._id, productId, quantity);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Cart updated successfully',
       cart
@@ -106,7 +106,7 @@ export const removeFromCart = async (req, res) => {
 
     const cart = await removeFromCartService(req.user._id, productId);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Item removed from cart',
       cart

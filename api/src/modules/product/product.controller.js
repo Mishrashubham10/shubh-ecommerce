@@ -25,7 +25,7 @@ export const createProduct = async (req, res) => {
 
     const product = await createProductService(productData);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Product created successfully',
       product,
@@ -52,7 +52,7 @@ export const getProducts = async (req, res) => {
       });
     }
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Product fetched successfully',
       productsDetail: {
@@ -112,7 +112,7 @@ export const updateProduct = async (req, res) => {
     Object.assign(product, req.body);
     await product.save();
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Product updated successfully',
     });
@@ -155,7 +155,7 @@ export const deleteProduct = async (req, res) => {
     product.isActive = false;
     await product.save();
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Product deleted successfully',
     });

@@ -8,6 +8,7 @@ import {
   registerUserService,
   resetPasswordService,
 } from './auth.service.js';
+import { sendSuccess } from '../../utils/apiResponse.js';
 
 /**
  * REGISTER CONTROLLER
@@ -15,7 +16,7 @@ import {
 export const register = asyncHandler(async (req, res) => {
   const data = await registerUserService(req.body);
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'User registered successfully',
     user: {
@@ -35,7 +36,7 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const data = await loginUserService(req.body);
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'User logged in successfully',
     user: {
@@ -59,7 +60,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
     refreshToken,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Refresh Token created',
     accessToken: data.accessToken,
@@ -75,7 +76,7 @@ export const logout = asyncHandler(async (req, res) => {
 
   await logoutService({ refreshToken });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'User Logged out successfully',
   });
@@ -87,7 +88,7 @@ export const logout = asyncHandler(async (req, res) => {
 export const logoutAll = asyncHandler(async (req, res) => {
   await logoutAllService({ userId: req.user._id });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'User Logged out from all devices',
   });
@@ -101,7 +102,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 
   await forgotPasswordService(email);
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'If that email exists, a reset link has been sent!',
   });
@@ -119,7 +120,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     newPassword: password,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Password reset successful',
   });

@@ -30,7 +30,8 @@ export const createOrder = async (req, res) => {
 
     const order = await createOrderService(req.user, cart, shippingAddress);
 
-    res.status(201).json({
+    sendSuccess(res, {
+      success: true,
       message: 'Order created successfully',
       order,
     });
@@ -54,7 +55,7 @@ export const updateOrderStatus = async (req, res) => {
       updatedBy: req.user._id,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Order status updated successfully',
       order,
@@ -79,7 +80,7 @@ export const getAdminOrders = async (req, res) => {
       status,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Order fetched successfully',
       ...data,
@@ -100,7 +101,7 @@ export const getOrderById = async (req, res) => {
 
     const order = await getOrderByIdService(orderId);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Order fetched successfully',
       order,
@@ -125,7 +126,7 @@ export const getSellerOrders = async (req, res) => {
       limit: Number(limit) || 10,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Seller orders fetched successfully',
       ...data,
@@ -150,7 +151,7 @@ export const getUserOrders = async (req, res) => {
       limit: Number(limit) || 1,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'User orders fetched successfully',
       ...data,
@@ -174,7 +175,7 @@ export const getUserOrderById = async (req, res) => {
       userId: req.user._id,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Order fetched successfully',
       order,
@@ -200,7 +201,7 @@ export const refundOrder = async (req, res) => {
       reason,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Order refunded successfully',
       order,
@@ -225,7 +226,7 @@ export const requestReturn = asyncHandler(async (req, res) => {
     reason,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Return requested successfully',
     order,

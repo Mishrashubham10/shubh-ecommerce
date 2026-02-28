@@ -20,7 +20,7 @@ export const updateShipmentStatus = asyncHandler(async (req, res) => {
     adminId: req.user._id,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Shipment updated successfully',
     shipment,
@@ -38,7 +38,7 @@ export const getUserShipmentTracking = asyncHandler(async (req, res) => {
     userId: req.user._id,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     shipment,
   });
@@ -56,7 +56,7 @@ export const getSellerShipments = asyncHandler(async (req, res) => {
     limit: Number(limit) || 10,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     ...data,
   });
@@ -80,7 +80,7 @@ export const courierWebhook = asyncHandler(async (req, res) => {
     status,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
   });
 });

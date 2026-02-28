@@ -1,7 +1,14 @@
 export const sendSuccess = (
   res,
-  { statusCode = 200, message = 'Success', data = null, meta = null },
+  options = {}, // 👈 default empty object
 ) => {
+  const {
+    statusCode = 200,
+    message = 'Success',
+    data = null,
+    meta = null,
+  } = options;
+
   return res.status(statusCode).json({
     success: true,
     message,

@@ -12,7 +12,7 @@ export const createAddress = async (req, res) => {
   try {
     const address = await createAddressService(req.user._id, req.body);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Address added successfully',
       address,
@@ -30,7 +30,7 @@ export const getAddress = async (req, res) => {
   try {
     const addresses = await getUserAddressessService(req.user._id);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Address fetched successfully',
       addresses,
@@ -50,7 +50,7 @@ export const deleteAddress = async (req, res) => {
 
     await deleteAddressService(req.user._id, addressId);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Address deleted successfully',
       addressId,

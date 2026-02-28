@@ -15,7 +15,7 @@ export const getMyNotifications = asyncHandler(async (req, res) => {
     notifications,
   });
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Notifications fetched successfully',
     notifications,
@@ -33,7 +33,7 @@ export const markAsRead = asyncHandler(async (req, res) => {
     { isRead: true },
   );
 
-  sendSuccess({
+  sendSuccess(res, {
     success: true,
     message: 'Notifications marked as read successfully',
   });

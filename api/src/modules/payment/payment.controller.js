@@ -21,7 +21,7 @@ export const createPayment = async (req, res) => {
 
     const payment = await createPaymentService(req.user._id, orderId);
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Payment initiated',
       paymentId: payment._id,
@@ -55,7 +55,7 @@ export const paymentWebhook = async (req, res) => {
       amount,
     });
 
-    sendSuccess({
+    sendSuccess(res, {
       success: true,
       message: 'Payment webhook',
     });
