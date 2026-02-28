@@ -11,6 +11,7 @@ import paymentRoutes from './modules/payment/payment.routes.js';
 import addressRoutes from './modules/address/address.routes.js';
 import shipmentRoutes from './modules/shipment/shipment.routes.js';
 import notificationRoutes from './modules/notification/notification.routes.js';
+import { ApiError } from './utils/ApiError.js';
 
 const app = express();
 
@@ -44,5 +45,8 @@ app.use(`${API_VERSION}/notifications`, notificationRoutes);
 
 // GLOBAL ERROR HANDLER
 // app.use(globalErrorHandler);
+app.use((req, res, next) => {
+  next(new ApiError(404, `Route not found: ${req.originalUrl}`));
+});
 
 export default app;
