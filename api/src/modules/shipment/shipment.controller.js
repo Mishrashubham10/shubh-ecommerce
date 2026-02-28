@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import {
   getSellerShipmentsService,
@@ -19,8 +20,9 @@ export const updateShipmentStatus = asyncHandler(async (req, res) => {
     adminId: req.user._id,
   });
 
-  res.json({
+  sendSuccess({
     success: true,
+    message: 'Shipment updated successfully',
     shipment,
   });
 });
@@ -36,7 +38,7 @@ export const getUserShipmentTracking = asyncHandler(async (req, res) => {
     userId: req.user._id,
   });
 
-  res.json({
+  sendSuccess({
     success: true,
     shipment,
   });
@@ -54,7 +56,7 @@ export const getSellerShipments = asyncHandler(async (req, res) => {
     limit: Number(limit) || 10,
   });
 
-  res.json({
+  sendSuccess({
     success: true,
     ...data,
   });
@@ -78,5 +80,7 @@ export const courierWebhook = asyncHandler(async (req, res) => {
     status,
   });
 
-  res.json({ success: true });
+  sendSuccess({
+    success: true,
+  });
 });

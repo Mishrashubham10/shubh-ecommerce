@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import Notification from './notification.model.js';
 
@@ -13,6 +14,12 @@ export const getMyNotifications = asyncHandler(async (req, res) => {
     success: true,
     notifications,
   });
+
+  sendSuccess({
+    success: true,
+    message: 'Notifications fetched successfully',
+    notifications,
+  });
 });
 
 /**
@@ -26,5 +33,8 @@ export const markAsRead = asyncHandler(async (req, res) => {
     { isRead: true },
   );
 
-  res.json({ success: true });
+  sendSuccess({
+    success: true,
+    message: 'Notifications marked as read successfully',
+  });
 });

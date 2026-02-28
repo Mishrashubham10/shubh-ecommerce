@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import {
   addToCartService,
   getOrCreateCart,
@@ -5,7 +6,10 @@ import {
   updateCartItemService,
 } from './cart.service.js';
 import { calculateCartTotal } from './cart.utils.js';
-import { validateAddToCart, validateRemoveFromCart } from './cart.validation.js';
+import {
+  validateAddToCart,
+  validateRemoveFromCart,
+} from './cart.validation.js';
 
 /**
  * GET CART
@@ -18,15 +22,19 @@ export const getCart = async (req, res) => {
      * Populate product info
      */
     await cart.populate({
-      path: "items.productId",
-      select: "title images price discountPrice stock"
-    })
+      path: 'items.productId',
+      select: 'title images price discountPrice stock',
+    });
 
     const totalPrice = calculateCartTotal(cart);
 
-    res.status(200).json({
-      ...cart.toObject(),
-      totalPrice,
+    sendSuccess({
+      success: true,
+      message: 'Cart fetched successfully',
+      data: {
+        ...cart.toObject(),
+        totalPrice
+      },
     });
   } catch (error) {
     console.error('GET CART ERROR:', error.message);
@@ -48,9 +56,10 @@ export const addToCart = async (req, res) => {
 
     const cart = await addToCartService(req.user._id, productId, quantity);
 
-    res.status(200).json({
+    sendSuccess({
+      success: true,
       message: 'Item added to cart',
-      cart,
+      cart
     });
   } catch (error) {
     console.error('ADD TO CART ERROR:', error.message);
@@ -72,9 +81,10 @@ export const updateCartItem = async (req, res) => {
 
     const cart = await updateCartItemService(req.user._id, productId, quantity);
 
-    res.status(200).json({
-      message: 'Cart updated',
-      cart,
+    sendSuccess({
+      success: true,
+      message: 'Cart updated successfully',
+      cart
     });
   } catch (error) {
     console.error('UPDATE CART ERROR:', error.message);
@@ -96,9 +106,10 @@ export const removeFromCart = async (req, res) => {
 
     const cart = await removeFromCartService(req.user._id, productId);
 
-    res.status(200).json({
+    sendSuccess({
+      success: true,
       message: 'Item removed from cart',
-      cart,
+      cart
     });
   } catch (error) {
     console.error('REMOVE FROM CART ERROR:', error.message);

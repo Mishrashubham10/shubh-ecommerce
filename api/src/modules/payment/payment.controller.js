@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import {
   createPaymentService,
   markPaymentSuccessService,
@@ -20,7 +21,8 @@ export const createPayment = async (req, res) => {
 
     const payment = await createPaymentService(req.user._id, orderId);
 
-    res.status(201).json({
+    sendSuccess({
+      success: true,
       message: 'Payment initiated',
       paymentId: payment._id,
       amount: payment.amount,
@@ -53,7 +55,10 @@ export const paymentWebhook = async (req, res) => {
       amount,
     });
 
-    res.status(200).json({ success: true });
+    sendSuccess({
+      success: true,
+      message: 'Payment webhook',
+    });
   } catch (err) {
     console.error('WEBHOOK ERROR:', err.message);
     res.status(400).json({ message: 'Webhook error' });

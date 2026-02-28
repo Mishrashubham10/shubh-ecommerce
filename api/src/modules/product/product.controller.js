@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import Product from './product.model.js';
 import {
   createProductService,
@@ -24,7 +25,8 @@ export const createProduct = async (req, res) => {
 
     const product = await createProductService(productData);
 
-    res.status(201).json({
+    sendSuccess({
+      success: true,
       message: 'Product created successfully',
       product,
     });
@@ -50,9 +52,13 @@ export const getProducts = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      count: products.length,
-      products,
+    sendSuccess({
+      success: true,
+      message: 'Product fetched successfully',
+      productsDetail: {
+        count: products.length,
+        products,
+      },
     });
   } catch (error) {
     console.error('GET PRODUCTS ERROR:', error.message);
@@ -106,7 +112,8 @@ export const updateProduct = async (req, res) => {
     Object.assign(product, req.body);
     await product.save();
 
-    res.status(200).json({
+    sendSuccess({
+      success: true,
       message: 'Product updated successfully',
     });
   } catch (error) {
@@ -148,7 +155,8 @@ export const deleteProduct = async (req, res) => {
     product.isActive = false;
     await product.save();
 
-    res.status(200).json({
+    sendSuccess({
+      success: true,
       message: 'Product deleted successfully',
     });
   } catch (error) {

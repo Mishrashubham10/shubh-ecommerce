@@ -1,10 +1,12 @@
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import {
+  forgotPasswordService,
   loginUserService,
   logoutAllService,
   logoutService,
   refreshAccessTokenService,
   registerUserService,
+  resetPasswordService,
 } from './auth.service.js';
 
 /**
@@ -13,16 +15,17 @@ import {
 export const register = asyncHandler(async (req, res) => {
   const data = await registerUserService(req.body);
 
-  res.status(201).json({
+  sendSuccess({
     success: true,
+    message: 'User registered successfully',
     user: {
       id: data.user._id,
       name: data.user.name,
       email: data.user.email,
       role: data.user.role,
     },
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken,
+    accessToken,
+    refreshToken,
   });
 });
 
@@ -32,16 +35,17 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const data = await loginUserService(req.body);
 
-  res.json({
-    message: 'Login successfully',
+  sendSuccess({
+    success: true,
+    message: 'User logged in successfully',
     user: {
       id: data.user._id,
       name: data.user.name,
       email: data.user.email,
       role: data.user.role,
     },
-    accessToken: data.accessToken,
-    refreshToke: data.refreshToken,
+    accessToken,
+    refreshToken,
   });
 });
 
@@ -55,8 +59,9 @@ export const refreshToken = asyncHandler(async (req, res) => {
     refreshToken,
   });
 
-  res.json({
+  sendSuccess({
     success: true,
+    message: 'Refresh Token created',
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
   });
@@ -70,9 +75,9 @@ export const logout = asyncHandler(async (req, res) => {
 
   await logoutService({ refreshToken });
 
-  res.json({
+  sendSuccess({
     success: true,
-    message: 'Logged out successfully',
+    message: 'User Logged out successfully',
   });
 });
 
@@ -82,8 +87,40 @@ export const logout = asyncHandler(async (req, res) => {
 export const logoutAll = asyncHandler(async (req, res) => {
   await logoutAllService({ userId: req.user._id });
 
-  res.json({
+  sendSuccess({
     success: true,
-    message: 'Logged out from all devices',
+    message: 'User Logged out from all devices',
+  });
+});
+
+/**
+ * FORGOT PASSWORD
+ */
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  await forgotPasswordService(email);
+
+  sendSuccess({
+    success: true,
+    message: 'If that email exists, a reset link has been sent!',
+  });
+});
+
+/**
+ * RESET PASSWORD
+ */
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  await resetPasswordService({
+    token,
+    newPassword: password,
+  });
+
+  sendSuccess({
+    success: true,
+    message: 'Password reset successful',
   });
 });

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 /**
- * REFRESH TOKEN (JWT)
+ * REFRESH TOKEN (JWT)d
  * WHOLE MONGOOSE MODEL
  */
 const refreshTokenSchema = new mongoose.Schema(

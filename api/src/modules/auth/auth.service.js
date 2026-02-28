@@ -1,7 +1,12 @@
 import { ApiError } from '../../utils/ApiError.js';
 import User from './auth.model.js';
-import { generateAccessToken, generateRefreshToken } from './auth.utils.js';
+import {
+  generateAccessToken,
+  generatePasswordResetToken,
+  generateRefreshToken,
+} from './auth.utils.js';
 import RefreshToken from './refreshToken.model.js';
+import { createHash } from 'node:crypto';
 
 /**
  * REGISTER USER SERVICE
@@ -35,7 +40,7 @@ export const registerUserService = async ({
   await RefreshToken.create({
     userId: user._id,
     token: refreshTokenValue,
-    expiresAt: new Date(
+    expireAt: new Date(
       Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
     ),
   });
@@ -65,10 +70,10 @@ export const loginUserService = async ({ email, password }) => {
   }
 
   // VERIFY PASSWORD
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    throw new ApiError(403, 'Invalid Credentials');
-  }
+  // const isMatch = await user.comparePassword(password);
+  // if (!isMatch) {
+  //   throw new ApiError(403, 'Invalid Credentials');
+  // }
 
   // GENERATE TOKENS
   const accessToken = generateAccessToken(user);
@@ -78,7 +83,7 @@ export const loginUserService = async ({ email, password }) => {
   await RefreshToken.create({
     userId: user._id,
     token: refreshTokenValue,
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    expireAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   return {
@@ -100,7 +105,7 @@ export const refreshAccessTokenService = async ({ refreshToken }) => {
   const storedToken = await RefreshToken.findOne({
     token: refreshToken,
     isRevoked: false,
-    expiresAt: { $gt: new Date() },
+    expireAt: { $gt: new Date() },
   });
 
   if (!storedToken) {
@@ -122,7 +127,7 @@ export const refreshAccessTokenService = async ({ refreshToken }) => {
   await RefreshToken.create({
     userId: user._id,
     token: newRefreshToken,
-    expiresAt: new Date(Date.now() * 30 * 24 * 60 * 60 * 1000),
+    expireAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   // ISSUE NEW ACCESS TOKEN
@@ -150,8 +155,63 @@ export const logoutService = async ({ refreshToken }) => {
  * LOGOUT ALL SESSIONS
  */
 export const logoutAllService = async ({ userId }) => {
+  if (!userId) {
+    throw new ApiError(400, 'User Id is required');
+  }
+
   await RefreshToken.updateMany(
     { userId, isRevoked: false },
     { isRevoked: true },
   );
+
+  return { message: 'Logged out from all devices' };
+};
+
+/**
+ * FORGOT PASSWORD SERVICE
+ */
+export const forgotPasswordService = async (email) => {
+  const user = await User.findOne({ email });
+
+  // DONOT REVEAL WEATHER USER EXISTS
+  if (!user) return;
+
+  const { rawToken, hashedToken } = generatePasswordResetToken();
+
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+  await user.save({ validateBeforeSave: false });
+
+  // For now we log token (later: send email)
+  console.log('🔐 RESET TOKEN:', rawToken);
+
+  return rawToken;
+};
+
+/**
+ * RESET PASSWORD SERVICE
+ */
+export const resetPasswordService = async ({ token, newPassword }) => {
+  const hashedToken = createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new ApiError(400, 'Invalid or expired reset token');
+  }
+
+  user.password = newPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+
+  // INVALIDATE ALL SESSIONS
+  await RefreshToken.deleteMany({ userId: user._id });
+
+  return true;
 };

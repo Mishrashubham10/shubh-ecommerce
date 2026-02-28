@@ -1,3 +1,4 @@
+import { sendSuccess } from '../../utils/apiResponse.js';
 import {
   createAddressService,
   deleteAddressService,
@@ -11,8 +12,10 @@ export const createAddress = async (req, res) => {
   try {
     const address = await createAddressService(req.user._id, req.body);
 
-    res.status(201).json({
+    sendSuccess({
+      success: true,
       message: 'Address added successfully',
+      address,
     });
   } catch (err) {
     console.error('CREATE ADDRESS ERROR:', err.message);
@@ -27,7 +30,11 @@ export const getAddress = async (req, res) => {
   try {
     const addresses = await getUserAddressessService(req.user._id);
 
-    res.status(200).json({ addresses });
+    sendSuccess({
+      success: true,
+      message: 'Address fetched successfully',
+      addresses,
+    });
   } catch (err) {
     console.error('GET ADDRESS ERROR:', err.message);
     res.status(500).json({ message: 'Failed to fetch addresses' });
@@ -43,8 +50,10 @@ export const deleteAddress = async (req, res) => {
 
     await deleteAddressService(req.user._id, addressId);
 
-    res.status(200).json({
+    sendSuccess({
+      success: true,
       message: 'Address deleted successfully',
+      addressId,
     });
   } catch (err) {
     console.error('DELETE ADDRESS ERROR:', err.message);

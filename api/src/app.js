@@ -2,9 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 
-// GLOBAL ERROR HANDLER
-import { globalErrorHandler } from './middlewares/error.middleware.js';
-
 // ROUTES
 import authRoutes from './modules/auth/auth.routes.js';
 import productRoutes from './modules/product/product.routes.js';
@@ -31,7 +28,7 @@ app.use(cors());
 app.use(express.json());
 
 /**
- * HEALTH CHECK ROUTE
+ * ROUTE
  * Used to verify server is alive
  */
 app.use(`${API_VERSION}/auth`, authRoutes);
@@ -46,6 +43,6 @@ app.use(`${API_VERSION}/shipments`, shipmentRoutes);
 app.use(`${API_VERSION}/notifications`, notificationRoutes);
 
 // GLOBAL ERROR HANDLER
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 export default app;

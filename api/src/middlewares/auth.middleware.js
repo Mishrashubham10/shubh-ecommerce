@@ -15,15 +15,15 @@ import { ApiError } from '../utils/ApiError.js';
  */
 export const protect = async (req, res, next) => {
   try {
-    let token;
+    const authHeaders = req.headers.authorization;
+    console.log('Auth Header:', authHeaders);
+
+    if (!authHeaders || !authHeaders.startsWith('Bearer ')) {
+      return next(new ApiError(401, 'Not authenticated'));
+    }
 
     // 1️⃣ Extract token
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-    }
+    const token = authHeaders.split(' ')[1];
 
     // 2️⃣ If no token → UNAUTHORIZED (NOT forbidden)
     if (!token) {
@@ -40,11 +40,21 @@ export const protect = async (req, res, next) => {
       return next(new ApiError(401, 'User not authorized'));
     }
 
+    if (
+      user.passwordChangedAt &&
+      decoded.iat * 1000 < user.passwordChangedAt.getTime()
+    ) {
+      return next(
+        new ApiError(401, 'Password recently changed. Please login again.'),
+      );
+    }
+
     // 5️⃣ Attach user
     req.user = user;
     next();
   } catch (error) {
-    return next(new ApiError(401, 'Invalid or expired token'));
+    console.log('JWT ERROR:', error.message);
+    return next(new ApiError(401, error.message));
   }
 };
 
@@ -64,13 +74,13 @@ export const authorizeRoles = (...allowedRoles) => {
      * So authorizeRoles MUST run AFTER protect
      */
     if (!req.user) {
-      return next(new ApiError(401, 'Not authenticated'))
+      return next(new ApiError(401, 'Not authenticated'));
     }
 
     console.log(req.user.role);
 
     if (!allowedRoles.includes(req.user.role)) {
-      return next(new ApiError(403, "Forbidden: You don't have permission"))
+      return next(new ApiError(403, "Forbidden: You don't have permission"));
     }
 
     console.log(allowedRoles);

@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
       enum: ['USER', 'SELLER', 'ADMIN', 'SUPER_ADMIN'],
       default: 'USER',
     },
-    // USERD FOR ACCOUNG CONTROL
+    // USED FOR ACCOUNT CONTROL
     isActive: {
       type: Boolean,
       default: true,
@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema(
     },
 
     passwordChangedAt: Date,
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: Date,
   },
   { timestamps: true },
 );
@@ -55,19 +60,18 @@ const userSchema = new mongoose.Schema(
  * This is extremely important at scale.
  */
 
-const User = mongoose.model('User', userSchema);
-
-export default User;
-
 /**
  * PASSWORD HASING (BCRYPT)
  * USING SCHEMA PRE METHOD
  */
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
 
   this.password = await bcrypt.hash(this.password, 12);
-  next();
+
+  if (!this.isNew) {
+    this.passwordChangedAt = Date.now() - 1000;
+  }
 });
 
 /**
@@ -76,3 +80,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+const User = mongoose.model('User', userSchema);
+
+export default User;
