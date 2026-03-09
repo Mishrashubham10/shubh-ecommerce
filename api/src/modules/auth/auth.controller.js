@@ -17,16 +17,15 @@ export const register = asyncHandler(async (req, res) => {
   const data = await registerUserService(req.body);
 
   sendSuccess(res, {
-    success: true,
     message: 'User registered successfully',
-    user: {
-      id: data.user._id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
+    data: {
+      user: {
+        id: data.user._id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+      },
     },
-    accessToken,
-    refreshToken,
   });
 });
 
@@ -39,14 +38,16 @@ export const login = asyncHandler(async (req, res) => {
   sendSuccess(res, {
     success: true,
     message: 'User logged in successfully',
-    user: {
-      id: data.user._id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
+    data: {
+      user: {
+        id: data.user._id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+      },
     },
-    accessToken,
-    refreshToken,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
   });
 });
 
