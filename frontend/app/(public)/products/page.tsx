@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import ProductsClient from './_productsClient';
+import { ProductsClientPage } from './_productsClient';
 
 export default function ProductsPage() {
   return (
     <Suspense fallback={null}>
-      <ProductsClient />
+      <ProductsClientPage />
     </Suspense>
   );
 }

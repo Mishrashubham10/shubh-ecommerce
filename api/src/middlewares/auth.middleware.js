@@ -16,7 +16,7 @@ import { ApiError } from '../utils/ApiError.js';
 export const protect = async (req, res, next) => {
   try {
     const authHeaders = req.headers.authorization;
-    console.log('Auth Header:', authHeaders);
+    console.log("Auth Header:", req.headers.authorization);
 
     if (!authHeaders || !authHeaders.startsWith('Bearer ')) {
       return next(new ApiError(401, 'Not authenticated'));

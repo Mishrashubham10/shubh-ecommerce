@@ -35,6 +35,9 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const data = await loginUserService(req.body);
 
+  console.log(data.accessToken);
+  console.log(data.refreshToken);
+
   sendSuccess(res, {
     success: true,
     message: 'User logged in successfully',
@@ -45,9 +48,9 @@ export const login = asyncHandler(async (req, res) => {
         email: data.user.email,
         role: data.user.role,
       },
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
     },
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken,
   });
 });
 

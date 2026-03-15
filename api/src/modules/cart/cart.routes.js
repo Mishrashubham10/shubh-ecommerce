@@ -6,13 +6,14 @@ import {
   addToCart,
   removeFromCart,
 } from './cart.controller.js';
+import { protect } from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 /**
  * All cart routes are USER protected
  */
-// router.use(protect);
+router.use(protect);
 
 router.get('/', getCart);
 router.post('/add', addToCart);

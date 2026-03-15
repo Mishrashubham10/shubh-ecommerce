@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import api from '@/lib/api';
 import { useEffect, useState } from 'react';
@@ -97,7 +98,7 @@ export default function CartPage() {
   /**
    * CALCULATE TOTAL
    */
-  const calculateTotal = cart.items.reduce(
+  const total = cart.items.reduce(
     (sum, item) => sum + item.productId.price * item.quantity,
     0,
   );
@@ -107,21 +108,54 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
       <div className="space-y-4">
-        {cart.items.map((cart) => (
-          <Card key={cart.productId._id}>
+        {cart.items.map((item) => (
+          <Card key={item.productId._id}>
             <CardContent className="flex items-center justify-between p-4">
               <div>
-                <h2 className="font-semibold">{cart.productId.title}</h2>
+                <h2 className="font-semibold">{item.productId.title}</h2>
 
-                <p className="text-gray-500">₹ {cart.productId.price}</p>
+                <p className="text-gray-500">₹ {item.productId.price}</p>
               </div>
 
               <div className="flex items-center gap-3">
-                
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    updateQuantity(item.productId._id, item.quantity - 1)
+                  }
+                  disabled={item.quantity <= 1}
+                >
+                  -
+                </Button>
+
+                <span>{item.quantity}</span>
+
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    updateQuantity(item.productId._id, item.quantity + 1)
+                  }
+                >
+                  +
+                </Button>
               </div>
+
+              <Button
+                variant="destructive"
+                onClick={() => removeItem(item.productId._id)}
+              >
+                Remove
+              </Button>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* ORDER SUMMARY */}
+      <div className="mt-8 flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Total: ₹ {total}</h2>
+
+        <Button size="lg">Proceed to Checkout</Button>
       </div>
     </div>
   );

@@ -1,30 +1,26 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true)
+
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-
     if (!token) {
       router.replace('/login');
+      toast.warning("You don't have access");
     }
-  }, [router]);
+  }, [token, router]);
 
-  // Optional: Prevent flicker
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-  }
-
-  if (isChecking) {
+  if (!token) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        Loading...
+        Checking authentication...
       </div>
     );
   }

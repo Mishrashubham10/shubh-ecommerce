@@ -38,17 +38,14 @@ export default function LoginPage() {
     },
   });
 
+  // ============== ONSUBMIT ===============
   const onSubmit = async (values: LoginFormValues) => {
     try {
       const res = await api.post('/auth/login', values);
 
-      const { user, accessToken, refreshToken } = res.data.data;
+      const { user, accessToken } = res.data.data;
 
-      // Store tokens
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
-      // Update global auth state
+      // SAVE AUTH-STATE (STORE + LOCALSTORAGE)
       setAuth(user, accessToken);
 
       // Redirect to products
